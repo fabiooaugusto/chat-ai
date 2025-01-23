@@ -1,10 +1,10 @@
-import { Button } from "@/components/ui/button";
+import Chat from "@/components/chat";
 import React from "react";
 
 function home() {
   return (
     <div className="p-4">
-      <Button>Clique Aqui</Button>
+      <Chat />
     </div>
   );
 }
