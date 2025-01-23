@@ -10,26 +10,33 @@ type Message = {
   text: string;
 };
 
-export function Chat() {
+type ChatProps = {
+  conversationId: string;
+};
+
+export function Chat({ conversationId }: ChatProps) {
+  const [conversations, setConversations] = useState<Record<string, Message[]>>(
+    {}
+  );
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState<string>("");
 
-  // Recuperar mensagens do localStorage ao carregar a página
+  // Recuperar mensagens do localStorage ao carregar
   useEffect(() => {
-    const savedMessages = localStorage.getItem("chatHistory");
-    if (savedMessages) {
-      setMessages(JSON.parse(savedMessages));
+    const savedChats = localStorage.getItem("chatMessages");
+    if (savedChats) {
+      setConversations(JSON.parse(savedChats));
     }
   }, []);
 
-  //Salvar mensagens no localStorage sempre que o state mudar
+  // Atualiza as mensagens quando troca a conversa
   useEffect(() => {
-    localStorage.setItem("chatHistory", JSON.stringify(messages));
-  }, [messages]);
+    setMessages(conversations[conversationId] || []);
+  }, [conversationId, conversations]);
 
-  // Função para enviar mensagem
+  // Enviar mensagem
   const sendMessage = () => {
-    if (!inputText.trim()) return; // Não enviar mensagem vazia
+    if (!inputText.trim()) return;
 
     const newMessage: Message = {
       id: Date.now(),
@@ -37,44 +44,53 @@ export function Chat() {
       text: inputText,
     };
 
-    // Simulando resposta do assistente
     const botResponse: Message = {
       id: Date.now() + 1,
       sender: "bot",
       text: "Esta é uma resposta automática!",
     };
 
-    setMessages([...messages, newMessage, botResponse]);
-    setInputText(""); // Limpar o campo de texto após envio
+    const updatedMessages = [...messages, newMessage, botResponse];
+
+    setConversations((prev) => ({
+      ...prev,
+      [conversationId]: updatedMessages,
+    }));
+
+    setMessages(updatedMessages);
+    setInputText("");
   };
 
-  return (
-    <main>
-      <div className="p-4">
-        <div className="border p-2 h-60 overflow-y-auto">
-          {messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`p-1 ${
-                msg.sender === "user" ? "text-right" : "text-left"
-              }`}
-            >
-              <strong>{msg.sender === "user" ? "Você" : "Bot"}:</strong>{" "}
-              {msg.text}
-            </div>
-          ))}
-        </div>
+  // Salvar no localStorage sempre que as mensagens mudarem
+  useEffect(() => {
+    localStorage.setItem("chatMessages", JSON.stringify(conversations));
+  }, [conversations]);
 
-        <div className="grid w-full gap-2 mt-4">
-          <Textarea
-            placeholder="Digite sua mensagem aqui..."
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)} // Atualizar o estado com o valor do textarea
-          />
-          <Button onClick={sendMessage}>Enviar Mensagem</Button>
-        </div>
+  return (
+    <div className="p-4">
+      <div className="border p-2 h-60 overflow-y-auto">
+        {messages.map((msg) => (
+          <div
+            key={msg.id}
+            className={`p-1 ${
+              msg.sender === "user" ? "text-right" : "text-left"
+            }`}
+          >
+            <strong>{msg.sender === "user" ? "Você" : "Bot"}:</strong>{" "}
+            {msg.text}
+          </div>
+        ))}
       </div>
-    </main>
+
+      <Textarea
+        placeholder="Digite sua mensagem..."
+        value={inputText}
+        onChange={(e) => setInputText(e.target.value)}
+      />
+      <Button onClick={sendMessage} className="mt-2">
+        Enviar Mensagem
+      </Button>
+    </div>
   );
 }
 
