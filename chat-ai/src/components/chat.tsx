@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useState, useEffect } from "react";
-import { getBotResponse } from "./botResponse";
 
 type Message = {
   id: number;
@@ -42,7 +41,7 @@ export function Chat({ currentConversationId }: ChatProps) {
   }, [messages, currentConversationId]);
 
   // Enviar mensagem
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (!inputText.trim()) return;
 
     const newMessage: Message = {
@@ -51,14 +50,29 @@ export function Chat({ currentConversationId }: ChatProps) {
       text: inputText,
     };
 
-    const botResponse: Message = {
-      id: Date.now() + 1,
-      sender: "bot",
-      text: getBotResponse(),
-    };
-
-    setMessages([...messages, newMessage, botResponse]);
+    setMessages([...messages, newMessage]);
     setInputText("");
+
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: inputText }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        const botResponse: Message = {
+          id: Date.now() + 1,
+          sender: "bot",
+          text: data.response,
+        };
+
+        setMessages((prev) => [...prev, botResponse]);
+      }
+    } catch (error) {
+      console.error("Erro ao enviar mensagem:", error);
+    }
   };
 
   const clearMessages = () => {
