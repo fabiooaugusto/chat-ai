@@ -3,36 +3,43 @@
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useState, useEffect } from "react";
+import { getBotResponse } from "./botResponse";
 
 type Message = {
   id: number;
   sender: "user" | "bot";
   text: string;
 };
-
 type ChatProps = {
-  conversationId: string;
+  currentConversationId: string | null;
 };
 
-export function Chat({ conversationId }: ChatProps) {
-  const [conversations, setConversations] = useState<Record<string, Message[]>>(
-    {}
-  );
+export function Chat({ currentConversationId }: ChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState<string>("");
 
   // Recuperar mensagens do localStorage ao carregar
   useEffect(() => {
-    const savedChats = localStorage.getItem("chatMessages");
-    if (savedChats) {
-      setConversations(JSON.parse(savedChats));
+    if (!currentConversationId) {
+      setMessages([]); // Limpa mensagens se não houver conversa selecionada
+      return;
     }
-  }, []);
+
+    const savedMessages = localStorage.getItem(
+      `chatHistory-${currentConversationId}`
+    );
+    setMessages(savedMessages ? JSON.parse(savedMessages) : []);
+  }, [currentConversationId]);
 
   // Atualiza as mensagens quando troca a conversa
   useEffect(() => {
-    setMessages(conversations[conversationId] || []);
-  }, [conversationId, conversations]);
+    if (currentConversationId) {
+      localStorage.setItem(
+        `chatHistory-${currentConversationId}`,
+        JSON.stringify(messages)
+      );
+    }
+  }, [messages, currentConversationId]);
 
   // Enviar mensagem
   const sendMessage = () => {
@@ -47,24 +54,17 @@ export function Chat({ conversationId }: ChatProps) {
     const botResponse: Message = {
       id: Date.now() + 1,
       sender: "bot",
-      text: "Esta é uma resposta automática!",
+      text: getBotResponse(),
     };
 
-    const updatedMessages = [...messages, newMessage, botResponse];
-
-    setConversations((prev) => ({
-      ...prev,
-      [conversationId]: updatedMessages,
-    }));
-
-    setMessages(updatedMessages);
+    setMessages([...messages, newMessage, botResponse]);
     setInputText("");
   };
 
-  // Salvar no localStorage sempre que as mensagens mudarem
-  useEffect(() => {
-    localStorage.setItem("chatMessages", JSON.stringify(conversations));
-  }, [conversations]);
+  const clearMessages = () => {
+    setMessages([]);
+    localStorage.removeItem(`chatHistory-${currentConversationId}`);
+  };
 
   return (
     <div className="p-4">
@@ -76,7 +76,7 @@ export function Chat({ conversationId }: ChatProps) {
               msg.sender === "user" ? "text-right" : "text-left"
             }`}
           >
-            <strong>{msg.sender === "user" ? "Você" : "Bot"}:</strong>{" "}
+            <strong>{msg.sender === "user" ? "Você" : "Bot"}:</strong>
             {msg.text}
           </div>
         ))}
@@ -89,6 +89,9 @@ export function Chat({ conversationId }: ChatProps) {
       />
       <Button onClick={sendMessage} className="mt-2">
         Enviar Mensagem
+      </Button>
+      <Button onClick={clearMessages} className="mt-2" variant="outline">
+        Limpar Histórico
       </Button>
     </div>
   );

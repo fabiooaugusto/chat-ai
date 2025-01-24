@@ -11,7 +11,7 @@ export default function HomePage() {
 
   return (
     <div className="flex h-screen">
-      {/* Lista de conversas */}
+      {/*Lista de conversas */}
       <ChatList
         currentConversationId={currentConversationId}
         setCurrentConversationId={setCurrentConversationId}
@@ -20,7 +20,7 @@ export default function HomePage() {
       {/* Area de chat */}
       <div className="flex-grow">
         {currentConversationId ? (
-          <Chat conversationId={currentConversationId} />
+          <Chat currentConversationId={currentConversationId} />
         ) : (
           <p className="text-center text-gray-500 p-4">
             Selecione uma conversa para começar
