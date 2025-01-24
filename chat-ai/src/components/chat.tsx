@@ -53,8 +53,9 @@ export function Chat({ currentConversationId }: ChatProps) {
     setMessages([...messages, newMessage]);
     setInputText("");
 
+    // Usar API para receber respostas
     try {
-      const response = await fetch("/api/chat", {
+      const response = await fetch("/api/chatBot", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: inputText }),
