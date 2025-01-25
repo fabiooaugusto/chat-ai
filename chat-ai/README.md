@@ -1,36 +1,124 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PS ![Logo do projeto](public\LogoTech4Humans.png) Tech4Humans
 
-## Getting Started
+## Visão Geral
 
-First, run the development server:
+Este é um chat interativo desenvolvido com **Next.js, TypeScript, Tailwind CSS e shadcn/ui**, utilizando o padrão **Backend for Frontend (BFF)**.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+A API do servidor processa mensagens e retorna respostas aleatórias para simular uma conversa.
+
+## Tecnologias Utilizadas
+
+- **Next.js** (v13+)
+- **TypeScript**
+- **Tailwind CSS**
+- **shadcn/ui**
+- **React**
+- **LocalStorage**
+
+## 📁 Estrutura do Projeto
+
+`bash npm install`
+
+```
+/src
+├── /components
+│ ├── Chat.tsx # Componente principal do chat
+│ ├── ui/ # Componentes de UI do shadcn
+│
+├── /app
+│ ├── page.tsx # Página principal do chat
+│
+├── /pages/api
+│ ├── api/chatBot.ts # API para o Backend for Frontend (BFF)
+│
+│ ├── /styles
+│ ├── globals.css # Estilos globais
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Como Rodar o Projeto
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 1️ Instale as dependências
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm install
+# ou
+yarn install
+```
 
-## Learn More
+### 2️ Inicie o servidor de desenvolvimento
 
-To learn more about Next.js, take a look at the following resources:
+```
+npm run dev
+# ou
+yarn dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+O projeto estará disponível em http://localhost:3000
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Funcionalidades
 
-## Deploy on Vercel
+- **Interface de chat interativa**
+- **Histórico de conversas salvo no LocalStorage**
+- **Mensagens processadas pelo BFF (API do Next.js)**
+- **Respostas do bot aleatórias**
+- **Estilização com Tailwind CSS e shadcn/ui**
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## API - Backend for Frontend (BFF)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+A API do chat está em /pages/api/chatBot.ts e funciona como um intermediário entre o front-end e as respostas do bot.
+
+Endpoint:
+
+```
+http
+
+POST /api/chat
+```
+
+### Request Body
+
+```
+json
+
+{
+  "message": "Olá, bot!"
+}
+```
+
+### Response Example
+
+```
+json
+
+{
+  "response": "Olá! Como posso te ajudar?"
+}
+```
+
+### Explicação do Backend for Frontend (BFF)
+
+O BFF (Backend for Frontend) é um padrão arquitetural onde o front-end se comunica apenas com um backend dedicado, em vez de acessar diretamente várias APIs externas. No nosso caso:
+
+O Next.js API Routes (/api/chatBot.ts) age como o BFF.
+O chat envia mensagens para /api/chat, que processa a mensagem e responde.
+O front-end não interage diretamente com serviços externos.
+
+### Benefícios do BFF no projeto:
+
+Melhora a segurança, evitando exposição direta de APIs externas.
+Permite manipulação e formatação de dados antes de chegar ao front-end.
+Facilita testes e manutenção da aplicação.
+
+### Histórico de Conversas
+
+O histórico de mensagens é armazenado no LocalStorage. Para cada conversa, as mensagens são salvas com a chave:
+
+```
+chatHistory-{conversationId}
+```
+
+Isso permite recuperar mensagens antigas ao alternar entre conversas.
+
+**Existe um bug ao recarregar a pagina**
+
+Quando recarrrecamos a pagina, o historico da conversa selecionada é excluido, ainda não descobri o motivo, mas deixo em aberto para melhorias futuras.
